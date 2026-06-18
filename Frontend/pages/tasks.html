@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Tasks | TaskFlow</title>
+  <meta name="description" content="View and manage all your assigned tasks in one place." />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/project.css" />
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="fas fa-rocket"></i></div>
+        <span class="sidebar-logo-text">TaskFlow</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-title">Main</div>
+      <a href="dashboard.html" class="sidebar-link" id="navDashboard">
+        <span class="sidebar-link-icon"><i class="fas fa-house"></i></span>
+        <span class="sidebar-link-text">Dashboard</span>
+      </a>
+      <a href="tasks.html" class="sidebar-link active" id="navMyTasks">
+        <span class="sidebar-link-icon"><i class="fas fa-check-double"></i></span>
+        <span class="sidebar-link-text">My Tasks</span>
+        <span class="sidebar-link-badge hidden" id="myTasksBadge">0</span>
+      </a>
+
+
+      <div class="sidebar-section-title" style="margin-top:16px">Projects</div>
+      <div class="sidebar-projects" id="sidebarProjects"></div>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <button class="sidebar-link btn-ghost" id="btnCreateProject" style="color:var(--primary-light)">
+        <span class="sidebar-link-icon"><i class="fas fa-plus"></i></span>
+        <span class="sidebar-link-text">New Project</span>
+      </button>
+      <div class="dropdown-divider" style="margin: 8px 0; opacity: 0.1;"></div>
+      <div class="sidebar-user" id="sidebarUser" title="Profile Settings" onclick="openProfileModal()">
+        <div class="avatar avatar-sm sidebar-avatar" style="background:#6366f1; flex-shrink:0;">?</div>
+        <div class="sidebar-user-info" style="flex:1; min-width:0;">
+          <div class="sidebar-user-name" style="text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">Loading...</div>
+          <div class="sidebar-user-role" id="sidebarUserRole">Member</div>
+        </div>
+      </div>
+      <button class="sidebar-link btn-ghost" id="btnLogout" style="margin-top: 4px;">
+        <span class="sidebar-link-icon"><i class="fas fa-door-open"></i></span>
+        <span class="sidebar-link-text">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" id="mainContent">
+    <header class="topnav">
+      <div class="topnav-left">
+        <button class="topnav-btn" id="sidebarToggle" title="Toggle Sidebar" style="margin-right: 16px;"><i class="fas fa-bars"></i></button>
+        <h1 class="topnav-title">My Assigned Tasks</h1>
+      </div>
+      <div class="topnav-right">
+        <div class="search-bar">
+          <span class="search-icon"><i class="fas fa-search"></i></span>
+          <input type="text" placeholder="Search projects, tasks..." id="globalSearch" />
+        </div>
+        <div class="dropdown" id="themeDropdown">
+          <button class="topnav-btn" id="themeToggle" title="Theme">
+            <i class="theme-icon fas fa-circle-half-stroke"></i>
+          </button>
+          <div class="dropdown-menu" style="top:50px; right:0">
+            <button class="dropdown-item" onclick="applyTheme('light')"><i class="fas fa-sun"></i> Light Mode</button>
+            <button class="dropdown-item" onclick="applyTheme('dark')"><i class="fas fa-moon"></i> Dark Mode</button>
+            <button class="dropdown-item" onclick="applyTheme('system')"><i class="fas fa-circle-half-stroke"></i> System Default</button>
+          </div>
+        </div>
+        <div class="dropdown" id="notifDropdown">
+          <button class="topnav-btn" id="notifBtn" title="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="notif-badge hidden" id="notifCount">0</span>
+          </button>
+          <div class="dropdown-menu" id="notificationsPanel" style="width: min(380px, 90vw); top: 50px; right: 0;">
+            <div class="notifications-header">
+              <h3>Notifications</h3>
+              <div style="display:flex; gap:10px">
+                <button class="btn-text" id="markAllRead">Mark all as read</button>
+                <button class="btn-text" id="clearAllNotifs" style="color:var(--danger)">Clear all</button>
+              </div>
+            </div>
+            <div class="notifications-list" id="notificationsList">
+              <div class="empty-state" style="padding:30px">
+                <div class="empty-state-icon">🔔</div>
+                <p>No notifications yet</p>
+              </div>
+            </div>
+            <div class="notifications-footer">
+              <a href="#" class="view-all-link">View all notifications</a>
+            </div>
+          </div>
+        </div>
+        <div class="dropdown" id="userDropdown">
+          <button class="topnav-btn" id="userMenuBtn" title="Account"><i class="fas fa-user-circle"></i></button>
+          <div class="dropdown-menu">
+            <button class="dropdown-item" id="btnProfile"><i class="fas fa-id-card"></i> Profile Settings</button>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" id="btnLogout2"><i class="fas fa-power-off"></i> Logout</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Manage Your Work</h1>
+          <p>All tasks across all projects assigned to you.</p>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar" style="margin-bottom: 24px;">
+        <div class="search-bar" style="width:300px">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search my tasks..." id="myTaskSearch" />
+        </div>
+        <select class="filter-select" id="myTaskPriorityFilter">
+          <option value="">All Priorities</option>
+          <option value="urgent">🔴 Urgent</option>
+          <option value="high">🟠 High</option>
+          <option value="medium">🔵 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+        <select class="filter-select" id="myTaskStatusFilter">
+          <option value="">All Statuses</option>
+          <option value="todo">📝 To Do</option>
+          <option value="done">✅ Completed</option>
+        </select>
+      </div>
+
+      <div class="list-view">
+        <div class="table-responsive">
+          <table class="list-table">
+            <thead>
+              <tr>
+                <th>Task Title</th>
+                <th>Project</th>
+                <th>Board / Status</th>
+                <th>Priority</th>
+                <th>Due Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="myTasksTableBody">
+              <tr>
+                <td colspan="6" style="text-align:center;padding:40px">
+                  <i class="fas fa-circle-notch fa-spin"></i> Loading tasks...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- TASK DETAIL MODAL -->
+<div class="modal-overlay" id="taskDetailModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div id="taskDetailBreadcrumb" style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Project / Board</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+        <h3 class="modal-title" id="taskDetailTitleDisplay">Task Detail</h3>
+        <button class="modal-close" data-close="taskDetailModal"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="task-detail-grid" id="taskDetailContent">
+       <!-- Dynamic content -->
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fas fa-user-circle"></i> Profile Settings</h3>
+      <button class="modal-close" data-close="profileModal"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="profileForm">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+        <div class="avatar avatar-xl" id="profileAvatar" style="background:#6366f1;font-size:28px">?</div>
+        <div>
+          <div id="profileDisplayName" style="font-size:18px;font-weight:700">—</div>
+          <div id="profileEmail" style="font-size:13px;color:var(--text-muted)">—</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" id="profileUsername" class="form-input" placeholder="Username" />
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-close="profileModal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="../js/api.js"></script>
+<script src="../js/utils.js"></script>
+<script src="../js/wsClient.js"></script>
+<script src="../js/notifications.js"></script>
+<script src="../js/tasks.js"></script>
+</body>
+</html>
